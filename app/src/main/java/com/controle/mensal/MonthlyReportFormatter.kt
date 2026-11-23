@@ -1,27 +1,32 @@
 package com.controle.mensal
 
-import java.util.Calendar
+import java.text.DateFormatSymbols
+import java.util.Locale
 
-class MonthlyReportManager(
-    private val salesManager: SalesManager,
-    private val expenseManager: ExpenseManager
-) {
+object MonthlyReportFormatter {
 
-    fun getReport(month: Int, year: Int): MonthlySummary {
-        return MonthlyReport.calculate(
-            sales = salesManager.getSales(),
-            expenses = expenseManager.getExpenses(),
-            month = month,
-            year = year
-        )
-    }
+    fun format(report: MonthlySummary): String {
 
-    fun getCurrentMonthReport(): MonthlySummary {
-        val calendar = Calendar.getInstance()
+        val locale = Locale("pt", "BR")
 
-        return getReport(
-            month = calendar.get(Calendar.MONTH),
-            year = calendar.get(Calendar.YEAR)
-        )
+        val monthName = DateFormatSymbols(locale)
+            .months[report.month]
+            .replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(locale) else it.toString()
+            }
+
+        return """
+            📊 RELATÓRIO MENSAL
+
+            Período: $monthName de ${report.year}
+
+            Pamonhas vendidas: ${report.totalUnits}
+
+            Faturamento: ${FinanceCalculator.formatMoney(report.revenueCents)}
+
+            Despesas: ${FinanceCalculator.formatMoney(report.expensesCents)}
+
+            Lucro real: ${FinanceCalculator.formatMoney(report.profitCents)}
+        """.trimIndent()
     }
 }
