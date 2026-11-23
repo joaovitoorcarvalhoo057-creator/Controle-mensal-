@@ -1,0 +1,13 @@
+
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Contador de Pamonhas</string>
+    <string name="sales_title">Controle de Vendas</string>
+    <string name="sales_count">Pamonhas vendidas</string>
+    <string name="revenue">Faturamento</string>
+    <string name="expenses">Despesas</string>
+    <string name="profit">Lucro real</string>
+    <string name="stock">Estoque</string>
+    <string name="history">Histórico</string>
+    <string name="settings">Configurações</string>
+</resources>
