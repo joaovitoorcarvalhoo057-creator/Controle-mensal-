@@ -12,17 +12,67 @@ class SalesManager(
 
     fun getSales(): List<SaleRecord> = sales.toList()
 
+    fun addFlavor(
+        name: String,
+        priceCents: Int,
+        stock: Int
+    ): Boolean {
+        if (name.isBlank() || priceCents <= 0 || stock < 0) {
+            return false
+        }
+
+        val flavor = PamonhaFlavor(
+            id = (flavors.maxOfOrNull { it.id } ?: 0L) + 1L,
+            name = name.trim(),
+            priceCents = priceCents,
+            stock = stock
+        )
+
+        flavors.add(flavor)
+        repository.saveFlavors(flavors)
+        return true
+    }
+
+    fun updateFlavor(
+        id: Long,
+        name: String,
+        priceCents: Int,
+        stock: Int
+    ): Boolean {
+        if (name.isBlank() || priceCents <= 0 || stock < 0) {
+            return false
+        }
+
+        val index = flavors.indexOfFirst { it.id == id }
+        if (index == -1) return false
+
+        flavors[index] = flavors[index].copy(
+            name = name.trim(),
+            priceCents = priceCents,
+            stock = stock
+        )
+
+        repository.saveFlavors(flavors)
+        return true
+    }
+
+    fun deleteFlavor(id: Long): Boolean {
+        if (sales.any { it.flavorId == id }) return false
+
+        val removed = flavors.removeAll { it.id == id }
+
+        if (removed) repository.saveFlavors(flavors)
+
+        return removed
+    }
+
     fun addSale(flavorId: Long, quantity: Int = 1): Boolean {
         if (quantity <= 0) return false
 
-        val index = flavors.indexOfFirst {
-            it.id == flavorId
-        }
-
+        val index = flavors.indexOfFirst { it.id == flavorId }
         if (index == -1) return false
 
         val flavor = flavors[index]
-
         if (flavor.stock < quantity) return false
 
         val sale = SaleRecord(
@@ -48,17 +98,12 @@ class SalesManager(
 
     fun undoLastSale(): Boolean {
         val sale = sales.lastOrNull() ?: return false
-
-        val index = flavors.indexOfFirst {
-            it.id == sale.flavorId
-        }
+        val index = flavors.indexOfFirst { it.id == sale.flavorId }
 
         if (index == -1) return false
 
-        val flavor = flavors[index]
-
-        flavors[index] = flavor.copy(
-            stock = flavor.stock + sale.quantity
+        flavors[index] = flavors[index].copy(
+            stock = flavors[index].stock + sale.quantity
         )
 
         sales.remove(sale)
@@ -72,17 +117,12 @@ class SalesManager(
     fun updateStock(flavorId: Long, quantity: Int): Boolean {
         if (quantity < 0) return false
 
-        val index = flavors.indexOfFirst {
-            it.id == flavorId
-        }
-
+        val index = flavors.indexOfFirst { it.id == flavorId }
         if (index == -1) return false
 
-        flavors[index] = flavors[index].copy(
-            stock = quantity
-        )
-
+        flavors[index] = flavors[index].copy(stock = quantity)
         repository.saveFlavors(flavors)
+
         return true
     }
 }
