@@ -15,6 +15,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var salesManager: SalesManager
     private lateinit var expenseManager: ExpenseManager
     private lateinit var closingRepository: ClosingRepository
+    private lateinit var monthlyReportManager: MonthlyReportManager
 
     private lateinit var content: LinearLayout
     private lateinit var summary: TextView
@@ -29,6 +30,11 @@ class MainActivity : AppCompatActivity() {
         salesManager = SalesManager(repository)
         expenseManager = ExpenseManager(repository)
         closingRepository = ClosingRepository(this)
+
+        monthlyReportManager = MonthlyReportManager(
+            salesManager,
+            expenseManager
+        )
 
         showDashboard()
     }
@@ -49,6 +55,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val scroll = ScrollView(this)
+
         content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(18, 18, 18, 24)
@@ -104,6 +111,13 @@ class MainActivity : AppCompatActivity() {
 
         addButton("📅 FECHAR O DIA") {
             closingDialog()
+        }
+
+        addButton("📈 RELATÓRIO MENSAL") {
+            MonthlyReportDialog.show(
+                this,
+                monthlyReportManager
+            )
         }
 
         addButton("📊 FECHAMENTOS ANTERIORES") {
