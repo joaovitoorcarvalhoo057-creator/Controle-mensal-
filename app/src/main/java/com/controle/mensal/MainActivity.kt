@@ -120,6 +120,13 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
+        addButton("🏆 RANKING MENSAL DE SABORES") {
+            MonthlyFlavorReportDialog.show(
+                this,
+                salesManager
+            )
+        }
+
         addButton("📊 FECHAMENTOS ANTERIORES") {
             closingsDialog()
         }
