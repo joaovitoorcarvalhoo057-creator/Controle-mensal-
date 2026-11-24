@@ -1,4 +1,3 @@
-
 package com.controle.mensal
 
 import android.os.Bundle
@@ -97,6 +96,7 @@ class MainActivity : AppCompatActivity() {
         scroll.addView(content)
 
         root.addView(header)
+
         root.addView(
             scroll,
             LinearLayout.LayoutParams(
@@ -313,12 +313,14 @@ class MainActivity : AppCompatActivity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(11), dp(11), dp(8), dp(11))
+
             background = roundedBackground(
                 Color.WHITE,
                 15,
                 Color.rgb(224, 233, 226),
                 dp(1)
             )
+
             elevation = dp(2).toFloat()
             isClickable = true
             isFocusable = true
@@ -373,30 +375,92 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addFlavorCard(flavor: PamonhaFlavor) {
+
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(17), dp(17), dp(17), dp(17))
-            background = roundedBackground(Color.WHITE, 17)
+            background = roundedBackground(Color.WHITE, 18)
             elevation = dp(3).toFloat()
         }
 
-        card.addView(TextView(this).apply {
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+
+        val name = TextView(this).apply {
             text = "🌽  ${flavor.name}"
             textSize = 19f
             typeface = titleFont
             setTextColor(darkGreen)
-        })
+        }
+
+        header.addView(
+            name,
+            LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1f
+            )
+        )
+
+        val stockColor = when {
+            flavor.stock <= 0 -> red
+            flavor.stock <= 5 -> Color.rgb(190, 125, 35)
+            else -> green
+        }
+
+        val stockLabel = when {
+            flavor.stock <= 0 -> "SEM ESTOQUE"
+            flavor.stock <= 5 -> "ESTOQUE BAIXO"
+            else -> "DISPONÍVEL"
+        }
+
+        val status = TextView(this).apply {
+            text = stockLabel
+            textSize = 9f
+            typeface = titleFont
+            setTextColor(stockColor)
+            setPadding(dp(9), dp(7), dp(9), dp(7))
+            background = roundedBackground(
+                when {
+                    flavor.stock <= 0 ->
+                        Color.rgb(252, 238, 238)
+                    flavor.stock <= 5 ->
+                        Color.rgb(252, 245, 231)
+                    else -> lightGreen
+                },
+                20
+            )
+        }
+
+        header.addView(status)
+        card.addView(header)
+
+        val divider = View(this).apply {
+            setBackgroundColor(Color.rgb(235, 240, 236))
+        }
+
+        card.addView(
+            divider,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dp(1)
+            ).apply {
+                topMargin = dp(14)
+                bottomMargin = dp(13)
+            }
+        )
 
         val info = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, dp(10), 0, dp(13))
         }
 
         val priceInfo = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
+
             addView(TextView(this@MainActivity).apply {
-                text = "PREÇO"
+                text = "PREÇO POR UNIDADE"
                 textSize = 10f
                 typeface = titleFont
                 setTextColor(gray)
@@ -406,30 +470,30 @@ class MainActivity : AppCompatActivity() {
                 text = FinanceCalculator.formatMoney(
                     flavor.priceCents.toLong()
                 )
-                textSize = 17f
+                textSize = 21f
                 typeface = numberFont
                 setTextColor(darkGreen)
-                setPadding(0, dp(3), 0, 0)
+                setPadding(0, dp(4), 0, 0)
             })
         }
 
         val stockInfo = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
+            gravity = Gravity.END
+
             addView(TextView(this@MainActivity).apply {
-                text = "ESTOQUE"
+                text = "QUANTIDADE"
                 textSize = 10f
                 typeface = titleFont
                 setTextColor(gray)
             })
 
             addView(TextView(this@MainActivity).apply {
-                text = "${flavor.stock} unidade(s)"
-                textSize = 17f
+                text = "${flavor.stock} unidades"
+                textSize = 19f
                 typeface = numberFont
-                setTextColor(
-                    if (flavor.stock > 0) green else red
-                )
-                setPadding(0, dp(3), 0, 0)
+                setTextColor(stockColor)
+                setPadding(0, dp(4), 0, 0)
             })
         }
 
@@ -439,14 +503,22 @@ class MainActivity : AppCompatActivity() {
         card.addView(info)
 
         val sell = Button(this).apply {
-            text = "＋ VENDER PAMONHA"
+            text = if (flavor.stock > 0) {
+                "＋  VENDER PAMONHA"
+            } else {
+                "SEM ESTOQUE DISPONÍVEL"
+            }
+
             isAllCaps = false
             textSize = 14f
             typeface = titleFont
             setTextColor(Color.WHITE)
+            isEnabled = flavor.stock > 0
 
             setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(green)
+                android.content.res.ColorStateList.valueOf(
+                    if (flavor.stock > 0) green else gray
+                )
             )
 
             setOnClickListener {
@@ -459,10 +531,24 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        card.addView(
+            sell,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dp(49)
+            ).apply {
+                topMargin = dp(15)
+            }
+        )
+
+        val secondaryActions = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+        }
+
         val edit = Button(this).apply {
-            text = "Editar sabor e estoque"
+            text = "✏ EDITAR"
             isAllCaps = false
-            textSize = 13f
+            textSize = 12f
             typeface = titleFont
             setTextColor(darkGreen)
 
@@ -476,9 +562,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         val delete = Button(this).apply {
-            text = "Excluir sabor"
+            text = "EXCLUIR"
             isAllCaps = false
-            textSize = 13f
+            textSize = 12f
             typeface = titleFont
             setTextColor(red)
 
@@ -505,15 +591,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        card.addView(sell)
-        card.addView(edit)
-        card.addView(delete)
+        secondaryActions.addView(edit, weightParams())
+        secondaryActions.addView(delete, weightParams())
+
+        card.addView(secondaryActions)
 
         val params = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply {
-            setMargins(0, dp(6), 0, dp(12))
+            setMargins(0, dp(7), 0, dp(12))
         }
 
         content.addView(card, params)
