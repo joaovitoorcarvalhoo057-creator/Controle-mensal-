@@ -74,14 +74,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         header.addView(TextView(this).apply {
-            text = "🌽 CONTADOR DE PAMONHAS"
+            text = "🌽 PAMONHARIA M&G"
             textSize = 22f
             typeface = titleFont
             setTextColor(Color.WHITE)
         })
 
         header.addView(TextView(this).apply {
-            text = "Organização e controle do seu negócio"
+            text = "Gestão e controle do seu negócio"
             textSize = 13f
             typeface = bodyFont
             setTextColor(Color.rgb(220, 235, 225))
