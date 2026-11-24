@@ -31,14 +31,18 @@ class MainActivity : AppCompatActivity() {
     private val gold = Color.rgb(231, 185, 79)
     private val red = Color.rgb(180, 65, 65)
 
-    private val titleFont =
-        Typeface.create("sans-serif-medium", Typeface.NORMAL)
+    // Fonte Nunito
+    private val titleFont by lazy {
+        resources.getFont(R.font.nunito_bold)
+    }
 
-    private val bodyFont =
-        Typeface.create("sans-serif", Typeface.NORMAL)
+    private val bodyFont by lazy {
+        resources.getFont(R.font.nunito_regular)
+    }
 
-    private val numberFont =
-        Typeface.create("sans-serif-medium", Typeface.NORMAL)
+    private val numberFont by lazy {
+        resources.getFont(R.font.nunito_bold)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,7 +98,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         scroll.addView(content)
-
         root.addView(header)
 
         root.addView(
@@ -107,7 +110,6 @@ class MainActivity : AppCompatActivity() {
         )
 
         setContentView(root)
-
         refreshDashboard()
     }
 
@@ -130,16 +132,10 @@ class MainActivity : AppCompatActivity() {
                 Pair("📜 Histórico de vendas", { historyDialog() }),
                 Pair("📅 Fechar o dia", { closingDialog() }),
                 Pair("📈 Relatório mensal", {
-                    MonthlyReportDialog.show(
-                        this,
-                        monthlyReportManager
-                    )
+                    MonthlyReportDialog.show(this, monthlyReportManager)
                 }),
                 Pair("🏆 Ranking mensal", {
-                    MonthlyFlavorReportDialog.show(
-                        this,
-                        salesManager
-                    )
+                    MonthlyFlavorReportDialog.show(this, salesManager)
                 }),
                 Pair("📊 Fechamentos anteriores", {
                     closingsDialog()
@@ -249,17 +245,11 @@ class MainActivity : AppCompatActivity() {
         content.addView(card, params)
     }
 
-    private fun metricView(
-        label: String,
-        value: String
-    ): LinearLayout {
+    private fun metricView(label: String, value: String): LinearLayout {
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(12), dp(12), dp(8), dp(12))
-            background = roundedBackground(
-                Color.rgb(43, 91, 72),
-                12
-            )
+            background = roundedBackground(Color.rgb(43, 91, 72), 12)
 
             addView(TextView(this@MainActivity).apply {
                 text = label
@@ -278,19 +268,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun addActionGrid(
-        items: List<Pair<String, () -> Unit>>
-    ) {
+    private fun addActionGrid(items: List<Pair<String, () -> Unit>>) {
         items.chunked(2).forEach { group ->
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
             }
 
             group.forEach { item ->
-                row.addView(
-                    actionButton(item.first, item.second),
-                    weightParams()
-                )
+                row.addView(actionButton(item.first, item.second), weightParams())
             }
 
             if (group.size == 1) {
@@ -301,10 +286,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun actionButton(
-        title: String,
-        action: () -> Unit
-    ): LinearLayout {
+    private fun actionButton(title: String, action: () -> Unit): LinearLayout {
         val parts = title.split(" ", limit = 2)
         val icon = parts.firstOrNull() ?: "•"
         val label = parts.getOrElse(1) { title }
@@ -313,14 +295,9 @@ class MainActivity : AppCompatActivity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(11), dp(11), dp(8), dp(11))
-
             background = roundedBackground(
-                Color.WHITE,
-                15,
-                Color.rgb(224, 233, 226),
-                dp(1)
+                Color.WHITE, 15, Color.rgb(224, 233, 226), dp(1)
             )
-
             elevation = dp(2).toFloat()
             isClickable = true
             isFocusable = true
@@ -333,13 +310,7 @@ class MainActivity : AppCompatActivity() {
                 setPadding(dp(8), dp(8), dp(8), dp(8))
             }
 
-            addView(
-                iconView,
-                LinearLayout.LayoutParams(
-                    dp(43),
-                    dp(43)
-                )
-            )
+            addView(iconView, LinearLayout.LayoutParams(dp(43), dp(43)))
 
             val labelView = TextView(this@MainActivity).apply {
                 text = label
@@ -360,22 +331,15 @@ class MainActivity : AppCompatActivity() {
                 )
             )
 
-            setOnClickListener {
-                action()
-            }
+            setOnClickListener { action() }
 
-            layoutParams = LinearLayout.LayoutParams(
-                0,
-                dp(78),
-                1f
-            ).apply {
+            layoutParams = LinearLayout.LayoutParams(0, dp(78), 1f).apply {
                 setMargins(dp(4), dp(5), dp(4), dp(5))
             }
         }
     }
 
     private fun addFlavorCard(flavor: PamonhaFlavor) {
-
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(17), dp(17), dp(17), dp(17))
@@ -397,11 +361,7 @@ class MainActivity : AppCompatActivity() {
 
         header.addView(
             name,
-            LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f
-            )
+            LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         )
 
         val stockColor = when {
@@ -424,10 +384,8 @@ class MainActivity : AppCompatActivity() {
             setPadding(dp(9), dp(7), dp(9), dp(7))
             background = roundedBackground(
                 when {
-                    flavor.stock <= 0 ->
-                        Color.rgb(252, 238, 238)
-                    flavor.stock <= 5 ->
-                        Color.rgb(252, 245, 231)
+                    flavor.stock <= 0 -> Color.rgb(252, 238, 238)
+                    flavor.stock <= 5 -> Color.rgb(252, 245, 231)
                     else -> lightGreen
                 },
                 20
@@ -467,9 +425,7 @@ class MainActivity : AppCompatActivity() {
             })
 
             addView(TextView(this@MainActivity).apply {
-                text = FinanceCalculator.formatMoney(
-                    flavor.priceCents.toLong()
-                )
+                text = FinanceCalculator.formatMoney(flavor.priceCents.toLong())
                 textSize = 21f
                 typeface = numberFont
                 setTextColor(darkGreen)
@@ -499,16 +455,10 @@ class MainActivity : AppCompatActivity() {
 
         info.addView(priceInfo, weightParams())
         info.addView(stockInfo, weightParams())
-
         card.addView(info)
 
         val sell = Button(this).apply {
-            text = if (flavor.stock > 0) {
-                "＋  VENDER PAMONHA"
-            } else {
-                "SEM ESTOQUE DISPONÍVEL"
-            }
-
+            text = if (flavor.stock > 0) "＋  VENDER PAMONHA" else "SEM ESTOQUE DISPONÍVEL"
             isAllCaps = false
             textSize = 14f
             typeface = titleFont
@@ -551,14 +501,10 @@ class MainActivity : AppCompatActivity() {
             textSize = 12f
             typeface = titleFont
             setTextColor(darkGreen)
-
             setBackgroundTintList(
                 android.content.res.ColorStateList.valueOf(lightGreen)
             )
-
-            setOnClickListener {
-                editFlavorDialog(flavor)
-            }
+            setOnClickListener { editFlavorDialog(flavor) }
         }
 
         val delete = Button(this).apply {
@@ -567,11 +513,8 @@ class MainActivity : AppCompatActivity() {
             textSize = 12f
             typeface = titleFont
             setTextColor(red)
-
             setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(
-                    Color.rgb(252, 241, 241)
-                )
+                android.content.res.ColorStateList.valueOf(Color.rgb(252, 241, 241))
             )
 
             setOnClickListener {
@@ -583,9 +526,7 @@ class MainActivity : AppCompatActivity() {
                             refreshDashboard()
                             message("Sabor excluído.")
                         } else {
-                            message(
-                                "Este sabor possui vendas registradas."
-                            )
+                            message("Este sabor possui vendas registradas.")
                         }
                     }.show()
             }
@@ -593,7 +534,6 @@ class MainActivity : AppCompatActivity() {
 
         secondaryActions.addView(edit, weightParams())
         secondaryActions.addView(delete, weightParams())
-
         card.addView(secondaryActions)
 
         val params = LinearLayout.LayoutParams(
@@ -609,16 +549,19 @@ class MainActivity : AppCompatActivity() {
     private fun flavorDialog() {
         val name = EditText(this).apply {
             hint = "Nome do sabor"
+            typeface = bodyFont
         }
 
         val price = EditText(this).apply {
             hint = "Preço em reais (ex: 6,00)"
             inputType = 8194
+            typeface = bodyFont
         }
 
         val stock = EditText(this).apply {
             hint = "Quantidade inicial no estoque"
             inputType = 2
+            typeface = bodyFont
         }
 
         AlertDialog.Builder(this)
@@ -629,11 +572,7 @@ class MainActivity : AppCompatActivity() {
                 val cents = parseMoney(price.text.toString())
                 val quantity = stock.text.toString().toIntOrNull() ?: -1
 
-                if (salesManager.addFlavor(
-                    name.text.toString(),
-                    cents,
-                    quantity
-                )) {
+                if (salesManager.addFlavor(name.text.toString(), cents, quantity)) {
                     refreshDashboard()
                     message("Sabor cadastrado!")
                 } else {
@@ -646,24 +585,21 @@ class MainActivity : AppCompatActivity() {
         val name = EditText(this).apply {
             setText(flavor.name)
             hint = "Nome"
+            typeface = bodyFont
         }
 
         val price = EditText(this).apply {
-            setText(
-                String.format(
-                    Locale.US,
-                    "%.2f",
-                    flavor.priceCents / 100.0
-                )
-            )
+            setText(String.format(Locale.US, "%.2f", flavor.priceCents / 100.0))
             hint = "Preço em reais"
             inputType = 8194
+            typeface = bodyFont
         }
 
         val stock = EditText(this).apply {
             setText(flavor.stock.toString())
             hint = "Estoque"
             inputType = 2
+            typeface = bodyFont
         }
 
         AlertDialog.Builder(this)
@@ -691,15 +627,18 @@ class MainActivity : AppCompatActivity() {
     private fun expenseDialog() {
         val description = EditText(this).apply {
             hint = "Descrição da despesa"
+            typeface = bodyFont
         }
 
         val category = EditText(this).apply {
             hint = "Categoria (milho, leite, embalagem...)"
+            typeface = bodyFont
         }
 
         val amount = EditText(this).apply {
             hint = "Valor em reais"
             inputType = 8194
+            typeface = bodyFont
         }
 
         AlertDialog.Builder(this)
@@ -748,9 +687,7 @@ class MainActivity : AppCompatActivity() {
             )
             .setNegativeButton("Cancelar", null)
             .setPositiveButton("Confirmar") { _, _ ->
-                val stock = salesManager.getFlavors().sumOf {
-                    it.stock
-                }
+                val stock = salesManager.getFlavors().sumOf { it.stock }
 
                 val closing = DailyClosingCalculator.create(
                     todaySales(),
@@ -759,7 +696,6 @@ class MainActivity : AppCompatActivity() {
                 )
 
                 closingRepository.save(closing)
-
                 message("Fechamento diário salvo!")
             }.show()
     }
