@@ -1,3 +1,4 @@
+
 package com.controle.mensal
 
 import android.os.Bundle
@@ -65,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         val header = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(22), dp(22), dp(22), dp(22))
+            setPadding(dp(22), dp(25), dp(22), dp(24))
             setBackgroundColor(darkGreen)
         }
 
@@ -81,10 +82,12 @@ class MainActivity : AppCompatActivity() {
             textSize = 13f
             typeface = bodyFont
             setTextColor(Color.rgb(220, 235, 225))
-            setPadding(0, dp(5), 0, 0)
+            setPadding(0, dp(6), 0, 0)
         })
 
-        val scroll = ScrollView(this)
+        val scroll = ScrollView(this).apply {
+            isFillViewport = true
+        }
 
         content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -94,7 +97,14 @@ class MainActivity : AppCompatActivity() {
         scroll.addView(content)
 
         root.addView(header)
-        root.addView(scroll)
+        root.addView(
+            scroll,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0,
+                1f
+            )
+        )
 
         setContentView(root)
 
@@ -153,80 +163,116 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addSummaryCard(result: FinancialSummary) {
-
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(18), dp(18), dp(18), dp(18))
-            background = roundedBackground(Color.WHITE, 16)
-            elevation = dp(3).toFloat()
+            setPadding(dp(19), dp(19), dp(19), dp(19))
+            background = roundedBackground(darkGreen, 20)
+            elevation = dp(4).toFloat()
         }
 
         card.addView(TextView(this).apply {
-            text = "📊  RESUMO DE HOJE"
-            textSize = 18f
+            text = "RESUMO FINANCEIRO"
+            textSize = 13f
+            letterSpacing = 0.12f
             typeface = titleFont
-            setTextColor(darkGreen)
-            setPadding(0, 0, 0, dp(15))
+            setTextColor(Color.rgb(205, 229, 214))
         })
 
-        addMetricRow(
-            card,
-            "Pamonhas vendidas",
-            result.totalUnits.toString(),
-            "Faturamento",
-            FinanceCalculator.formatMoney(result.revenueCents)
-        )
+        card.addView(TextView(this).apply {
+            text = "🌽 ${result.totalUnits} pamonhas vendidas"
+            textSize = 23f
+            typeface = titleFont
+            setTextColor(Color.WHITE)
+            setPadding(0, dp(9), 0, dp(17))
+        })
 
-        addMetricRow(
-            card,
-            "Despesas",
-            FinanceCalculator.formatMoney(result.expensesCents),
-            "Lucro real",
-            FinanceCalculator.formatMoney(result.profitCents)
-        )
-
-        content.addView(card)
-    }
-
-    private fun addMetricRow(
-        parent: LinearLayout,
-        label1: String,
-        value1: String,
-        label2: String,
-        value2: String
-    ) {
-        val row = LinearLayout(this).apply {
+        val firstRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
         }
 
-        row.addView(metricView(label1, value1), weightParams())
-        row.addView(metricView(label2, value2), weightParams())
+        firstRow.addView(
+            metricView(
+                "Faturamento",
+                FinanceCalculator.formatMoney(result.revenueCents)
+            ),
+            weightParams()
+        )
 
-        parent.addView(row)
+        firstRow.addView(
+            metricView(
+                "Despesas",
+                FinanceCalculator.formatMoney(result.expensesCents)
+            ),
+            weightParams()
+        )
+
+        card.addView(firstRow)
+
+        val profit = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(14), dp(13), dp(14), dp(13))
+            background = roundedBackground(lightGreen, 13)
+        }
+
+        profit.addView(TextView(this).apply {
+            text = "LUCRO REAL DE HOJE"
+            textSize = 11f
+            letterSpacing = 0.1f
+            typeface = titleFont
+            setTextColor(gray)
+        })
+
+        profit.addView(TextView(this).apply {
+            text = FinanceCalculator.formatMoney(result.profitCents)
+            textSize = 25f
+            typeface = numberFont
+            setTextColor(darkGreen)
+            setPadding(0, dp(4), 0, 0)
+        })
+
+        val profitParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            topMargin = dp(10)
+        }
+
+        card.addView(profit, profitParams)
+
+        val params = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            bottomMargin = dp(10)
+        }
+
+        content.addView(card, params)
     }
 
     private fun metricView(
         label: String,
         value: String
     ): LinearLayout {
-
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(11), dp(13), dp(8), dp(13))
-            background = roundedBackground(lightGreen, 11)
+            setPadding(dp(12), dp(12), dp(8), dp(12))
+            background = roundedBackground(
+                Color.rgb(43, 91, 72),
+                12
+            )
 
             addView(TextView(this@MainActivity).apply {
                 text = label
                 textSize = 12f
                 typeface = bodyFont
-                setTextColor(gray)
+                setTextColor(Color.rgb(210, 229, 216))
             })
 
             addView(TextView(this@MainActivity).apply {
                 text = value
-                textSize = 18f
+                textSize = 17f
                 typeface = numberFont
-                setTextColor(darkGreen)
+                setTextColor(Color.WHITE)
                 setPadding(0, dp(5), 0, 0)
             })
         }
@@ -235,9 +281,7 @@ class MainActivity : AppCompatActivity() {
     private fun addActionGrid(
         items: List<Pair<String, () -> Unit>>
     ) {
-
         items.chunked(2).forEach { group ->
-
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
             }
@@ -260,25 +304,59 @@ class MainActivity : AppCompatActivity() {
     private fun actionButton(
         title: String,
         action: () -> Unit
-    ): Button {
+    ): LinearLayout {
+        val parts = title.split(" ", limit = 2)
+        val icon = parts.firstOrNull() ?: "•"
+        val label = parts.getOrElse(1) { title }
 
-        return Button(this).apply {
-            text = title
-            textSize = 13f
-            isAllCaps = false
-            typeface = titleFont
-            setTextColor(darkGreen)
-            gravity = Gravity.CENTER
-            setPadding(dp(5), dp(7), dp(5), dp(7))
-
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(11), dp(11), dp(8), dp(11))
             background = roundedBackground(
                 Color.WHITE,
-                13,
-                Color.rgb(218, 231, 221),
+                15,
+                Color.rgb(224, 233, 226),
                 dp(1)
             )
-
             elevation = dp(2).toFloat()
+            isClickable = true
+            isFocusable = true
+
+            val iconView = TextView(this@MainActivity).apply {
+                text = icon
+                textSize = 21f
+                gravity = Gravity.CENTER
+                background = roundedBackground(lightGreen, 12)
+                setPadding(dp(8), dp(8), dp(8), dp(8))
+            }
+
+            addView(
+                iconView,
+                LinearLayout.LayoutParams(
+                    dp(43),
+                    dp(43)
+                )
+            )
+
+            val labelView = TextView(this@MainActivity).apply {
+                text = label
+                textSize = 12.5f
+                typeface = titleFont
+                setTextColor(textColor)
+                gravity = Gravity.CENTER_VERTICAL
+                maxLines = 2
+                setPadding(dp(9), 0, 0, 0)
+            }
+
+            addView(
+                labelView,
+                LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f
+                )
+            )
 
             setOnClickListener {
                 action()
@@ -286,7 +364,7 @@ class MainActivity : AppCompatActivity() {
 
             layoutParams = LinearLayout.LayoutParams(
                 0,
-                dp(65),
+                dp(78),
                 1f
             ).apply {
                 setMargins(dp(4), dp(5), dp(4), dp(5))
@@ -295,11 +373,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addFlavorCard(flavor: PamonhaFlavor) {
-
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(16), dp(15), dp(16), dp(15))
-            background = roundedBackground(Color.WHITE, 14)
+            setPadding(dp(17), dp(17), dp(17), dp(17))
+            background = roundedBackground(Color.WHITE, 17)
             elevation = dp(3).toFloat()
         }
 
@@ -310,18 +387,56 @@ class MainActivity : AppCompatActivity() {
             setTextColor(darkGreen)
         })
 
-        card.addView(TextView(this).apply {
-            text = "Preço: ${
-                FinanceCalculator.formatMoney(
+        val info = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(10), 0, dp(13))
+        }
+
+        val priceInfo = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(TextView(this@MainActivity).apply {
+                text = "PREÇO"
+                textSize = 10f
+                typeface = titleFont
+                setTextColor(gray)
+            })
+
+            addView(TextView(this@MainActivity).apply {
+                text = FinanceCalculator.formatMoney(
                     flavor.priceCents.toLong()
                 )
-            }\nEstoque: ${flavor.stock} unidade(s)"
+                textSize = 17f
+                typeface = numberFont
+                setTextColor(darkGreen)
+                setPadding(0, dp(3), 0, 0)
+            })
+        }
 
-            textSize = 15f
-            typeface = bodyFont
-            setTextColor(textColor)
-            setPadding(0, dp(8), 0, dp(10))
-        })
+        val stockInfo = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(TextView(this@MainActivity).apply {
+                text = "ESTOQUE"
+                textSize = 10f
+                typeface = titleFont
+                setTextColor(gray)
+            })
+
+            addView(TextView(this@MainActivity).apply {
+                text = "${flavor.stock} unidade(s)"
+                textSize = 17f
+                typeface = numberFont
+                setTextColor(
+                    if (flavor.stock > 0) green else red
+                )
+                setPadding(0, dp(3), 0, 0)
+            })
+        }
+
+        info.addView(priceInfo, weightParams())
+        info.addView(stockInfo, weightParams())
+
+        card.addView(info)
 
         val sell = Button(this).apply {
             text = "＋ VENDER PAMONHA"
@@ -405,7 +520,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun flavorDialog() {
-
         val name = EditText(this).apply {
             hint = "Nome do sabor"
         }
@@ -425,7 +539,6 @@ class MainActivity : AppCompatActivity() {
             .setView(dialogLayout(name, price, stock))
             .setNegativeButton("Cancelar", null)
             .setPositiveButton("Salvar") { _, _ ->
-
                 val cents = parseMoney(price.text.toString())
                 val quantity = stock.text.toString().toIntOrNull() ?: -1
 
@@ -443,7 +556,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun editFlavorDialog(flavor: PamonhaFlavor) {
-
         val name = EditText(this).apply {
             setText(flavor.name)
             hint = "Nome"
@@ -472,7 +584,6 @@ class MainActivity : AppCompatActivity() {
             .setView(dialogLayout(name, price, stock))
             .setNegativeButton("Cancelar", null)
             .setPositiveButton("Salvar") { _, _ ->
-
                 val cents = parseMoney(price.text.toString())
                 val quantity = stock.text.toString().toIntOrNull() ?: -1
 
@@ -491,7 +602,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun expenseDialog() {
-
         val description = EditText(this).apply {
             hint = "Descrição da despesa"
         }
@@ -510,7 +620,6 @@ class MainActivity : AppCompatActivity() {
             .setView(dialogLayout(description, category, amount))
             .setNegativeButton("Cancelar", null)
             .setPositiveButton("Salvar") { _, _ ->
-
                 val cents = parseMoney(amount.text.toString())
 
                 if (expenseManager.addExpense(
@@ -527,7 +636,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun historyDialog() {
-
         val sales = todaySales()
 
         val text = sales.joinToString("\n\n") {
@@ -545,7 +653,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun closingDialog() {
-
         AlertDialog.Builder(this)
             .setTitle("Fechar o dia?")
             .setMessage(
@@ -554,7 +661,6 @@ class MainActivity : AppCompatActivity() {
             )
             .setNegativeButton("Cancelar", null)
             .setPositiveButton("Confirmar") { _, _ ->
-
                 val stock = salesManager.getFlavors().sumOf {
                     it.stock
                 }
@@ -572,11 +678,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun closingsDialog() {
-
         val closings = closingRepository.load()
 
         val text = closings.joinToString("\n\n") {
-
             val date = java.text.DateFormat
                 .getDateTimeInstance()
                 .format(it.closingTime)
@@ -598,7 +702,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun todaySales(): List<SaleRecord> {
-
         val start = dayStart()
         val end = start + 24L * 60L * 60L * 1000L
 
@@ -608,7 +711,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun todayExpenses(): List<ExpenseRecord> {
-
         val start = dayStart()
         val end = start + 24L * 60L * 60L * 1000L
 
@@ -618,7 +720,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun dayStart(): Long {
-
         return Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 0)
             set(Calendar.MINUTE, 0)
@@ -628,7 +729,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun parseMoney(value: String): Int {
-
         return try {
             (value.trim().replace(",", ".").toBigDecimal() *
                 java.math.BigDecimal(100))
@@ -640,7 +740,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun dialogLayout(vararg fields: EditText): LinearLayout {
-
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(25), dp(10), dp(25), dp(10))
@@ -653,18 +752,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addSection(title: String) {
+        val section = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(3), dp(22), dp(3), dp(9))
+        }
 
-        content.addView(TextView(this).apply {
+        section.addView(TextView(this).apply {
             text = title
-            textSize = 16f
+            textSize = 15f
             typeface = titleFont
             setTextColor(darkGreen)
-            setPadding(dp(3), dp(22), dp(3), dp(9))
         })
+
+        content.addView(section)
     }
 
     private fun weightParams(): LinearLayout.LayoutParams {
-
         return LinearLayout.LayoutParams(
             0,
             LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -680,7 +784,6 @@ class MainActivity : AppCompatActivity() {
         strokeColor: Int = Color.TRANSPARENT,
         strokeWidth: Int = 0
     ): GradientDrawable {
-
         return GradientDrawable().apply {
             setColor(color)
             cornerRadius = dp(radius).toFloat()
